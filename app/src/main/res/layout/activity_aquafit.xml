@@ -1,0 +1,25 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="pt.iade.games.TidesOfCleania.AquaFit">
+
+    <TextView
+        android:text="AquaFit Screen"
+        android:textSize="24sp"
+        android:textColor="@color/res64_10"
+        android:layout_marginBottom="32dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <Button
+        android:id="@+id/btnBack"
+        android:text="Back"
+        android:backgroundTint="@color/res64_34"
+        android:textColor="@color/res64_10"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+</LinearLayout>

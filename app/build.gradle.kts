@@ -1,16 +1,16 @@
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
 }
 
 android {
     namespace = "pt.iade.games.TidesOfCleania"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "pt.iade.games.TidesOfCleania"
-        minSdk = 24
-        targetSdk = 34
+        minSdk = 21
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -36,11 +36,13 @@ android {
 }
 
 dependencies {
-
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.appcompat)
-    implementation(libs.material)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
+        implementation("androidx.core:core-ktx:1.10.1") // Compatible with AGP 8.6.1
+        implementation("androidx.appcompat:appcompat:1.6.1")
+        implementation("com.google.android.material:material:1.9.0")
+        implementation("androidx.activity:activity-ktx:1.7.2")
+        implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation(libs.androidx.material3.android)
+    testImplementation("junit:junit:4.13.2")
+        androidTestImplementation("androidx.test.ext:junit:1.1.5")
+        androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 }
