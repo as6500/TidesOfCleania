@@ -5,7 +5,7 @@
     android:gravity="center"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="pt.iade.games.TidesOfCleania.AquaFit">
+    tools:context="pt.iade.games.TidesOfCleania.AquaOke">
 
     <TextView
         android:text="AquaFit Screen"
@@ -17,9 +17,9 @@
 
     <Button
         android:id="@+id/btnBack"
-        android:text="Back"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:backgroundTint="@color/res64_34"
         android:textColor="@color/res64_10"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:text="Back" />
 </LinearLayout>
