@@ -1,11 +1,21 @@
 package pt.iade.games.TidesOfCleania
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.media.AudioAttributes
+import android.media.AudioFormat
+import android.media.AudioRecord
+import android.media.MediaRecorder
+import android.media.SoundPool
+import android.os.Build
 import android.os.Bundle
 import android.widget.Button
+import androidx.annotation.RequiresApi
+import androidx.annotation.RequiresPermission
 import androidx.appcompat.app.AppCompatActivity
-import android.media.AudioAttributes
-import android.media.SoundPool
+import androidx.compose.runtime.Composable
+//import com.paramsen.noise.Noise
 
 class AquaOke : AppCompatActivity() {
     private lateinit var soundPool: SoundPool
@@ -16,10 +26,21 @@ class AquaOke : AppCompatActivity() {
     private var mi = 0
     private var re = 0
     private var doo = 0
+    private val REQUEST_MIC = 200
+    private var isListening = false
 
+    @RequiresApi(Build.VERSION_CODES.M)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_aquaoke)
+
+        //request mic permission
+        requestMicPermission()
+
+        //Start game button
+        //startListeningToMic
+
+
 
         val btnBack = findViewById<Button>(R.id.btnBack)
         btnBack.setOnClickListener {
@@ -80,4 +101,21 @@ class AquaOke : AppCompatActivity() {
         findViewById<Button>(R.id.buttonA).setOnClickListener { playNoteLa() }
         findViewById<Button>(R.id.buttonB).setOnClickListener { playNoteSi() }
     }
+
+
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    private fun requestMicPermission() {
+        if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO), REQUEST_MIC)
+        }
+    }
+
+
+
+
+
+
+
+
 }
