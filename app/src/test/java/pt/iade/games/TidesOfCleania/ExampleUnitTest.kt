@@ -1,4 +1,4 @@
-package pt.iade.games.TidesOfCleania
+package pt.iade.games.tidesofcleania
 
 import org.junit.Test
 

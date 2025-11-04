@@ -1,14 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.TidesOfCleania" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- App brand colors -->
-        <item name="colorPrimary">@color/res64_13</item>
-        <item name="colorPrimaryContainer">@color/res64_23</item>
-        <item name="colorOnPrimary">@color/res64_10</item> //text
 
-        <!-- Status & navigation bar colors -->
-        <item name="android:statusBarColor">@color/res64_23</item>
-        <item name="android:navigationBarColor">@color/res64_23</item>
-
-        <item name="android:windowBackground">@color/res64_48</item> //background
-    </style>
+    <style name="Theme.TidesOfCleania" parent="android:Theme.Material.Light.NoActionBar" />
 </resources>

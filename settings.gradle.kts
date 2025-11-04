@@ -1,3 +1,5 @@
+import java.net.URI
+
 pluginManagement {
     repositories {
         google {
@@ -16,9 +18,12 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
-        maven(url = "https://jitpack.io")
+        maven {
+            url = URI("https://jitpack.io")
+        }
     }
 }
 
 rootProject.name = "Tides of Cleania"
 include(":app")
+ 
