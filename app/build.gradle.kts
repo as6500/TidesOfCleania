@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "pt.iade.games.tidesofcleania"
+    namespace = "pt.iade.games.TidesOfCleania"
     compileSdk = 36
 
     defaultConfig {
