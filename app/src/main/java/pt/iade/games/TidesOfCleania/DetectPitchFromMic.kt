@@ -13,7 +13,7 @@ import be.tarsos.dsp.pitch.PitchDetectionHandler
 import be.tarsos.dsp.pitch.PitchDetectionResult
 import be.tarsos.dsp.pitch.PitchProcessor
 
-fun VoiceThing(
+fun DetectPitchFromMic(
     context: Context,
     activity: Activity,
     callback: (result: PitchDetectionResult, event: AudioEvent?) -> Unit
@@ -27,9 +27,9 @@ fun VoiceThing(
     }
 
     val dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(
-        44000, 1024, 0)
+        48000, 2048, 0)
     val p: AudioProcessor = PitchProcessor(PitchProcessor.PitchEstimationAlgorithm.FFT_YIN,
-        44000f, 1024,
+        48000f, 2048,
         PitchDetectionHandler { result, e -> callback(result, e) })
     dispatcher.addAudioProcessor(p)
     Thread(dispatcher, "Audio Dispatcher").start()
