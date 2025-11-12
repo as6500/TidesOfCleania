@@ -121,18 +121,3 @@ fun HomeScreenPreview() {
     HomeScreen(440f, {})
 }
 
-fun frequencyToNoteAllOctaves(freq: Float): String {
-    // Create an array of the 12 note names in one octave
-    val notes = arrayOf("C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B")
-    // Check if there is no sound to evaluate
-    if (freq <= 0) return "Invalid frequency"
-    // Get the number of semitones difference from A4(440 Hz)
-    val numberOfSemitones = 12 * log2(freq / 440.0)
-    // Rounding to get to the nearest semitone
-    val semitone = numberOfSemitones.roundToInt()
-    // Get the note from the semitone
-    val noteIndex = (semitone + 9).mod(12)
-    // Get the octave from the semitone
-    val octave = 4 + ((semitone + 9) / 12)
-    return "${notes[noteIndex]}$octave"
-}

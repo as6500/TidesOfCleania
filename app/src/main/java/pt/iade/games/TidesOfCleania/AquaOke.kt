@@ -9,6 +9,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
@@ -63,7 +64,7 @@ class AquaOke : ComponentActivity() {
 
 
             MaterialTheme {
-                AquaOkeScreen(440f, onBack = { finish() })
+                AquaOkeScreen(pitch, onBack = { finish() })
             }
         }
     }
@@ -117,126 +118,106 @@ fun AquaOkeScreen(
 //        rawIds.forEach { soundPool.load(context, it, 1) }
 //    }
 
+    // Notes displayed on screen; ignore the octave
+    val noteBoxes = listOf("B", "A", "G", "F", "E", "D", "C")
+    val boxHeight = 100.dp
+
+    // Detect if we have a valid pitch
+    val hasPitch = pitch > 0f
+
+    // Get note name from detected pitch
+    val noteName = remember(pitch) {
+        if (hasPitch) frequencyToNoteAllOctaves(pitch)
+        else "Invalid"
+    }
+    // Extract just the letter (ignore octave and sharps)
+    val baseNote = noteName.takeWhile { it.isLetter() }
+
+    // Find matching box index
+    val noteIndex = if (hasPitch)
+        noteBoxes.indexOfFirst { it == baseNote }.takeIf { it >= 0 } ?: 0
+    else
+        -1 // a special flag to hide the line
+
+    // Animate vertical position of the line
+    val animatedOffset by animateDpAsState(
+        targetValue = (noteIndex * boxHeight.value).dp,
+        label = "pitchLineOffset"
+    )
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("AquaOke") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-//                        Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
                     }
                 }
             )
         }
     ) { padding ->
 
-//        Column {
-//            Text(
-//                text = "${frequencyToNoteAllOctaves(pitch)} ($pitch Hz)",
-//                fontSize = 40.sp,
-//                textAlign = TextAlign.Center,
-//                modifier = Modifier.fillMaxWidth()
-//            )
-//        }
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(16.dp)
+                .padding(padding)
         ) {
-            Column (
-                verticalArrangement = Arrangement.SpaceEvenly,
-                modifier = Modifier.fillMaxHeight()
+            // Make the note boxes in different colors
+            Column(
+                verticalArrangement = Arrangement.Top,
+                modifier = Modifier.align(Alignment.TopStart)
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(100.dp)
-                        .background(Color(0xffe83b3b))
-                ) {
+                val colors = listOf(
+                    Color(0xffe83b3b),
+                    Color(0xfffb6b1d),
+                    Color(0xfff79617),
+                    Color(0xff91db69),
+                    Color(0xff4d9be6),
+                    Color(0xffa884f3),
+                    Color(0xfff04f78)
+                )
 
-                    Text(
-                        text = "B",
-                        fontSize = 40.sp,
-                        textAlign = TextAlign.Left,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-                Box(
-                    modifier = Modifier
-                        .size(100.dp)
-                        .background(Color(0xfffb6b1d))
-                ) {
-                    Text(
-                        text = "A",
-                        fontSize = 40.sp,
-                        textAlign = TextAlign.Left,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-                Box(
-                    modifier = Modifier
-                        .size(100.dp)
-                        .background(Color(0xfff79617) )
-                ) {
-                    Text(
-                        text = "G",
-                        fontSize = 40.sp,
-                        textAlign = TextAlign.Left,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-                Box(
-                    modifier = Modifier
-                        .size(100.dp)
-                        .background(Color(0xff91db69) )
-                ) {
-                    Text(
-                        text = "F",
-                        fontSize = 40.sp,
-                        textAlign = TextAlign.Left,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-                Box(
-                    modifier = Modifier
-                        .size(100.dp)
-                        .background(Color(0xff4d9be6))
-                ) {
-                    Text(
-                        text = "E",
-                        fontSize = 40.sp,
-                        textAlign = TextAlign.Left,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-                Box(
-                    modifier = Modifier
-                        .size(100.dp)
-                        .background(Color(0xffa884f3))
-                ) {
-                    Text(
-                        text = "D",
-                        fontSize = 40.sp,
-                        textAlign = TextAlign.Left,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-                Box(
-                    modifier = Modifier
-                        .size(100.dp)
-                        .background(Color(0xfff04f78))
-                ) {
-                    Text(
-                        text = "C",
-                        fontSize = 40.sp,
-                        textAlign = TextAlign.Left,
-                        modifier = Modifier.fillMaxWidth()
-                    )
+                noteBoxes.forEachIndexed { index, note ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(boxHeight)
+                            .background(colors[index])
+                    ) {
+                        Text(
+                            text = note,
+                            fontSize = 40.sp,
+                            modifier = Modifier
+                                .align(Alignment.CenterStart)
+                                .padding(start = 16.dp)
+                        )
+                    }
                 }
             }
 
-        }
+            // Line of current pitch of player
+            if (hasPitch) {
+                Box(
+                    modifier = Modifier
+                        .offset(y = animatedOffset)
+                        .fillMaxWidth()
+                        .height(4.dp)
+                        .background(Color.Black)
+                )
+            }
 
-        // Commenting this out to start making the actual layout
+            // Debug values to display
+            Column(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(16.dp)
+            ) {
+                Text("Pitch: %.2f Hz".format(pitch))
+                Text("Note: $noteName")
+            }
+
+            // Commenting this out to start making the actual layout
 //
 //        Column(
 //            modifier = Modifier
@@ -273,6 +254,7 @@ fun AquaOkeScreen(
 //                Text("Loading sounds...")
 //            }
 //        }
+        }
     }
 }
 
@@ -300,4 +282,20 @@ fun AquaOkeScreen(
 @Composable
 fun AquaOkeScreenPreview() {
     AquaOkeScreen(440f, {})
+}
+
+fun frequencyToNoteAllOctaves(freq: Float): String {
+    // Create an array of the 12 note names in one octave
+    val notes = arrayOf("C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B")
+    // Check if there is no sound to evaluate
+    if (freq <= 0) return "Invalid frequency"
+    // Get the number of semitones difference from A4(440 Hz)
+    val numberOfSemitones = 12 * log2(freq / 440.0)
+    // Rounding to get to the nearest semitone
+    val semitone = numberOfSemitones.roundToInt()
+    // Get the note from the semitone
+    val noteIndex = (semitone + 9).mod(12)
+    // Get the octave from the semitone
+    val octave = 4 + ((semitone + 9) / 12)
+    return "${notes[noteIndex]}$octave"
 }
