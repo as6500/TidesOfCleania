@@ -140,11 +140,11 @@ fun AquaOkeScreen(
     val noteIndex = if (hasPitch)
         noteBoxes.indexOfFirst { it == baseNote }.takeIf { it >= 0 } ?: 0
     else
-        -1 // a special flag to hide the line
+        -1 // The number to hide the line
 
     // Animate vertical position of the line
     val animatedOffset by animateDpAsState(
-        targetValue = (noteIndex * (boxHeight.value/2)).dp,
+        targetValue = (noteIndex * boxHeight.value + boxHeight.value/2).dp,
         label = "pitchLineOffset"
     )
 
