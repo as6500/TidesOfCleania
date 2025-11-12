@@ -65,6 +65,9 @@ class AquaOke : ComponentActivity() {
 
             MaterialTheme {
                 AquaOkeScreen(pitch, onBack = { finish() })
+                SideEffect {
+                    launcher.launch(Manifest.permission.RECORD_AUDIO)
+                }
             }
         }
     }
@@ -141,7 +144,7 @@ fun AquaOkeScreen(
 
     // Animate vertical position of the line
     val animatedOffset by animateDpAsState(
-        targetValue = (noteIndex * boxHeight.value).dp,
+        targetValue = (noteIndex * (boxHeight.value/2)).dp,
         label = "pitchLineOffset"
     )
 
