@@ -48,17 +48,17 @@ class MainActivity : ComponentActivity() {
                 if (isGranted) {
                     // Permission Accepted: Do something
                     Log.d("HomeScreen","PERMISSION GRANTED")
-                    DetectPitchFromMic(
-                        context = context,
-                        activity = this,
-                        callback = { result, event ->
-                            pitch = result.pitch
-                            if (pitch > 0) { // valid pitch
-                                val note = frequencyToNoteAllOctaves(pitch)
-                                Log.i("Pitch", "Detected note: $note ($pitch Hz)")
-                            }
-                            //Log.i("Pitch", "Pitch is " + result.pitch + " Hz");
-                        })
+//                    DetectPitchFromMic(
+//                        context = context,
+//                        activity = this,
+//                        callback = { result, event ->
+//                            pitch = result.pitch
+//                            if (pitch > 0) { // valid pitch
+//                                val note = frequencyToNoteAllOctaves(pitch)
+//                                Log.i("Pitch", "Detected note: $note ($pitch Hz)")
+//                            }
+//                            //Log.i("Pitch", "Pitch is " + result.pitch + " Hz");
+//                        })
                 } else {
                     // Permission Denied: Do something
                     Log.d("HomeScreen","PERMISSION DENIED")
