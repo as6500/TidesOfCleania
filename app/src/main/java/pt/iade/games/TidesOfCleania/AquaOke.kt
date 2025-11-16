@@ -1,9 +1,6 @@
 package pt.iade.games.tidesofcleania
 
 import android.Manifest
-import android.content.Intent
-import android.media.AudioAttributes
-import android.media.SoundPool
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -21,14 +18,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlin.collections.get
 import kotlin.math.*
 
 class AquaOke : ComponentActivity() {
@@ -73,7 +66,6 @@ class AquaOke : ComponentActivity() {
     }
 }
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AquaOkeScreen(
@@ -83,45 +75,7 @@ fun AquaOkeScreen(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
-//    val soundPool = remember {
-//        SoundPool.Builder()
-//            .setMaxStreams(7)
-//            .setAudioAttributes(
-//                AudioAttributes.Builder()
-//                    .setUsage(AudioAttributes.USAGE_GAME)
-//                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-//                    .build()
-//            )
-//            .build()
-//    }
-//
-//    val notes = remember { mutableStateListOf<Int>() }
-//    var allLoaded by remember { mutableStateOf(false) }
-//
-//    LaunchedEffect(Unit) {
-//        val rawIds = listOf(
-//            R.raw.marimba_do,
-//            R.raw.marimba_re,
-//            R.raw.marimba_mi,
-//            R.raw.marimba_fa,
-//            R.raw.marimba_sol,
-//            R.raw.marimba_la,
-//            R.raw.marimba_si
-//        )
-//        var loadedCount = 0
-//        soundPool.setOnLoadCompleteListener { _, sampleId, status ->
-//            if (status == 0) {
-//                notes.add(sampleId)
-//                loadedCount++
-//                if (loadedCount == rawIds.size) {
-//                    allLoaded = true
-//                }
-//            }
-//        }
-//        rawIds.forEach { soundPool.load(context, it, 1) }
-//    }
-
-    // Notes displayed on screen; ignore the octave
+    // Notes displayed on screen (ignore the octave)
     val noteBoxes = listOf("B", "A", "G", "F", "E", "D", "C")
     val boxHeight = 100.dp
 
@@ -133,20 +87,63 @@ fun AquaOkeScreen(
         if (hasPitch) frequencyToNoteAllOctaves(pitch)
         else "Invalid"
     }
-    // Extract just the letter (ignore octave and sharps)
     val baseNote = noteName.takeWhile { it.isLetter() }
 
     // Find matching box index
     val noteIndex = if (hasPitch)
         noteBoxes.indexOfFirst { it == baseNote }.takeIf { it >= 0 } ?: 0
     else
-        -1 // The number to hide the line
+        -1
 
-    // Animate vertical position of the line
+    // Animate vertical position of the pitch line
     val animatedOffset by animateDpAsState(
-        targetValue = (noteIndex * boxHeight.value + boxHeight.value/2).dp,
+        targetValue = (noteIndex * boxHeight.value + boxHeight.value / 2).dp,
         label = "pitchLineOffset"
     )
+
+    // Moving notes state
+    var movingNotes by remember { mutableStateOf(listOf<MovingNote>()) }
+
+    // Score
+    var score by remember { mutableStateOf(0) }
+
+    // Update notes position and spawn new notes
+    LaunchedEffect(Unit) {
+        while (true) {
+            val deltaTime = 16L // ~60 FPS
+            val screenWidth = context.resources.displayMetrics.widthPixels.toFloat()
+
+            movingNotes = movingNotes.map { note ->
+                note.copy(x = note.x - note.speed * deltaTime / 1000f)
+            }.filter { it.x + 50f > 0f } // 50f = note width, remove if off scree
+
+            // Spawn new notes every 300px apart
+            if (movingNotes.isEmpty() || movingNotes.last().x < screenWidth - 300f) {
+                movingNotes = movingNotes + generateNote(screenWidth)
+            }
+
+            kotlinx.coroutines.delay(deltaTime)
+        }
+    }
+
+    val density = LocalDensity.current
+    val hitThreshold = with(density) { 20.dp.toPx() }
+    val animatedOffsetPx = with(density) { animatedOffset.toPx() } // convert pitch line to px
+    val boxHeightPx = with(density) { boxHeight.toPx() } // convert box height to px
+
+    // Hit detection
+    LaunchedEffect(movingNotes, pitch) {
+        if (hasPitch) {
+            val toRemove = movingNotes.filter { note ->
+                val noteYPx = noteBoxes.indexOf(note.note) * boxHeightPx + boxHeightPx / 2
+                abs(animatedOffsetPx - noteYPx) < hitThreshold && note.note == baseNote
+            }
+            if (toRemove.isNotEmpty()) {
+                score += toRemove.size
+                movingNotes = movingNotes - toRemove
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -166,7 +163,7 @@ fun AquaOkeScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            // Make the note boxes in different colors
+            // Draw note boxes
             Column(
                 verticalArrangement = Arrangement.Top,
                 modifier = Modifier.align(Alignment.TopStart)
@@ -199,7 +196,25 @@ fun AquaOkeScreen(
                 }
             }
 
-            // Line of current pitch of player
+            // Draw moving notes
+            movingNotes.forEach { note ->
+                val noteY = noteBoxes.indexOf(note.note) * boxHeight.value
+                Box(
+                    modifier = Modifier
+                        .offset(x = note.x.dp, y = noteY.dp)
+                        .size(50.dp, boxHeight)
+                        .background(Color.White)
+                ) {
+                    Text(
+                        note.note,
+                        modifier = Modifier.align(Alignment.Center),
+                        fontSize = 24.sp,
+                        color = Color.Black
+                    )
+                }
+            }
+
+            // Draw pitch line
             if (hasPitch) {
                 Box(
                     modifier = Modifier
@@ -210,76 +225,32 @@ fun AquaOkeScreen(
                 )
             }
 
-            // Debug values to display
+            // Debug / Score display
             Column(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(16.dp)
             ) {
+                Text("Score: $score", fontSize = 20.sp)
                 Text("Pitch: %.2f Hz".format(pitch))
                 Text("Note: $noteName")
             }
-
-            // Commenting this out to start making the actual layout
-//
-//        Column(
-//            modifier = Modifier
-//                .fillMaxSize()
-//                .padding(padding)
-//                .padding(16.dp),
-//            verticalArrangement = Arrangement.Center,
-//            horizontalAlignment = Alignment.CenterHorizontally
-//        ) {
-//            val noteLabels = listOf("Do", "Re", "Mi", "Fa", "Sol", "La", "Si")
-//            noteLabels.forEachIndexed { index, label ->
-//                Button(
-//                    onClick = { playNote(index) },
-//                    enabled = allLoaded, // disable until loaded
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .padding(vertical = 4.dp)
-//                ) {
-//                    Text(label)
-//                }
-//            }
-//
-//            Spacer(modifier = Modifier.height(16.dp))
-//
-//            Button(
-//                onClick = { playRandomSong() },
-//                enabled = allLoaded
-//            ) {
-//                Text("Play Random Song")
-//            }
-//
-//            if (!allLoaded) {
-//                Spacer(modifier = Modifier.height(8.dp))
-//                Text("Loading sounds...")
-//            }
-//        }
         }
     }
 }
 
-//fun playNote(
-//    index: Int,
-//    allLoaded: Boolean,
-//    notes: List<Int>,
-//    soundPool: SoundPool) {
-//    if (allLoaded && index in notes.indices) {
-//        soundPool.play(notes[index], 1f, 1f, 0, 0, 1f)
-//    }
-//}
-//
-//fun playRandomSong(coroutineScope: CoroutineScope) {
-//    val randomNotes = List(20) { (0..6).random() }
-//    coroutineScope.launch {
-//        for ( i in randomNotes) {
-//            playNote(i)
-//            delay(600L)
-//        }
-//    }
-//}
+// Moving note class and generator
+data class MovingNote(
+    val note: String,
+    var x: Float,
+    val speed: Float = 200f
+)
+
+fun generateNote(screenWidth: Float): MovingNote {
+    val notes = listOf("C", "D", "E", "F", "G", "A", "B")
+    val note = notes.random()
+    return MovingNote(note = note, x = screenWidth, speed = 200f)
+}
 
 @Preview(showBackground = true)
 @Composable
