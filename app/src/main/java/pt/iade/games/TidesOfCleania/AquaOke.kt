@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -200,10 +201,16 @@ fun AquaOkeScreen(
                             Text(
                                 "Buff Awarded: +$fullBuffPercentage% speed for $buffDurationMinutes minutes",
                                 fontSize = 20.sp,
-                                color = Color.Green
+                                color = Color.Green,
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Center
                             )
                         } else {
-                            Text("No buff awarded", fontSize = 20.sp, color = Color.Red)
+                            Text("No buff awarded",
+                                fontSize = 20.sp,
+                                color = Color.Red,
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Center)
                         }
 
                         Spacer(modifier = Modifier.height(20.dp))

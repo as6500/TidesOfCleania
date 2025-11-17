@@ -96,12 +96,12 @@ fun HomeScreen(
     Column(
         modifier = Modifier.padding(top = 200.dp)
     ) {
-        Text(
-            text = "${frequencyToNoteAllOctaves(pitch)} ($pitch Hz)",
-            fontSize = 40.sp,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth()
-        )
+//        Text(
+//            text = "${frequencyToNoteAllOctaves(pitch)} ($pitch Hz)",
+//            fontSize = 40.sp,
+//            textAlign = TextAlign.Center,
+//            modifier = Modifier.fillMaxWidth()
+//        )
     }
     Box(
         modifier = Modifier
