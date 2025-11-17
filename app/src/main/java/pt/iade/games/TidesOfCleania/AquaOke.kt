@@ -28,7 +28,6 @@ class AquaOke : ComponentActivity() {
     override fun onCreate(savedInstanceState: android.os.Bundle?) {
         super.onCreate(savedInstanceState)
 
-
         setContent {
             var pitch by remember { mutableFloatStateOf(0f) }
             val context = LocalContext.current
@@ -54,7 +53,6 @@ class AquaOke : ComponentActivity() {
                     Log.d("HomeScreen", "PERMISSION DENIED")
                 }
             }
-
 
             MaterialTheme {
                 AquaOkeScreen(pitch, onBack = { finish() })
@@ -103,23 +101,41 @@ fun AquaOkeScreen(
 
     // Moving notes state
     var movingNotes by remember { mutableStateOf(listOf<MovingNote>()) }
+    var twinkleIndex by remember { mutableStateOf(0) }
 
-    // Score
+
+    // Score and gamestate
     var score by remember { mutableStateOf(0) }
+    var spawnedNotes by remember { mutableStateOf(0) }
+    var totalNotes by remember { mutableStateOf(10) }
+    var gameOver by remember { mutableStateOf(false) }
 
-    // Update notes position and spawn new notes
+    //buff settings
+    val maxBuffDurationMinutes = 10 //maximum buff that can be awarded
+    val completionThreshold = 0.2f // 20% or above to get a buff
+    val fullBuffPercentage = 25 //how much buff is awarded, for the text only
+
+
+    // update notes position and spawn new notes
     LaunchedEffect(Unit) {
         while (true) {
-            val deltaTime = 16L // ~60 FPS
+            val deltaTime = 16L // this 60 FPS
             val screenWidth = context.resources.displayMetrics.widthPixels.toFloat()
 
+            // move each note leftt and remove those that passed the left side
             movingNotes = movingNotes.map { note ->
                 note.copy(x = note.x - note.speed * deltaTime / 1000f)
             }.filter { it.x + 50f > 0f } // 50f = note width, remove if off scree
 
-            // Spawn new notes every 300px apart
-            if (movingNotes.isEmpty() || movingNotes.last().x < screenWidth - 300f) {
-                movingNotes = movingNotes + generateNote(screenWidth)
+            // Spawn new notes every 300px
+            if (spawnedNotes < totalNotes && (movingNotes.isEmpty() || movingNotes.last().x < screenWidth - 300f)) {
+                movingNotes = movingNotes + generateTwinkleNote(screenWidth) //CHANGE HERE FOR RANDOM MODE
+                spawnedNotes += 1
+            }
+
+            // end game after 10 notes and theres no more notes
+            if ( spawnedNotes >= totalNotes && movingNotes.isEmpty()) {
+                gameOver = true
             }
 
             kotlinx.coroutines.delay(deltaTime)
@@ -127,18 +143,20 @@ fun AquaOkeScreen(
     }
 
     val density = LocalDensity.current
-    val hitThreshold = with(density) { 20.dp.toPx() }
+    val hitThreshold = with(density) { 20.dp.toPx() } // vertical difference in pixels to count as a note hit
     val animatedOffsetPx = with(density) { animatedOffset.toPx() } // convert pitch line to px
     val boxHeightPx = with(density) { boxHeight.toPx() } // convert box height to px
 
-    // Hit detection
+    // hit detection
     LaunchedEffect(movingNotes, pitch) {
         if (hasPitch) {
             val toRemove = movingNotes.filter { note ->
+                //note's lane Y center to put the notes in the center of the track
                 val noteYPx = noteBoxes.indexOf(note.note) * boxHeightPx + boxHeightPx / 2
+                //check if note is close and if it matches the correct note
                 abs(animatedOffsetPx - noteYPx) < hitThreshold && note.note == baseNote
             }
-            if (toRemove.isNotEmpty()) {
+            if (toRemove.isNotEmpty()) { //add to remove
                 score += toRemove.size
                 movingNotes = movingNotes - toRemove
             }
@@ -150,106 +168,139 @@ fun AquaOkeScreen(
             TopAppBar(
                 title = { Text("AquaOke") },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
-                    }
+                    IconButton(onClick = onBack) { Icon(Icons.Filled.ArrowBack, contentDescription = "Back") }
                 }
             )
         }
     ) { padding ->
+        Box(modifier = Modifier.fillMaxSize().padding(padding)) {
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
-            // Draw note boxes
-            Column(
-                verticalArrangement = Arrangement.Top,
-                modifier = Modifier.align(Alignment.TopStart)
-            ) {
-                val colors = listOf(
-                    Color(0xffe83b3b),
-                    Color(0xfffb6b1d),
-                    Color(0xfff79617),
-                    Color(0xff91db69),
-                    Color(0xff4d9be6),
-                    Color(0xffa884f3),
-                    Color(0xfff04f78)
-                )
+            if (gameOver) { //show game over screen instead of board if the game is over
 
-                noteBoxes.forEachIndexed { index, note ->
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(boxHeight)
-                            .background(colors[index])
-                    ) {
-                        Text(
-                            text = note,
-                            fontSize = 40.sp,
-                            modifier = Modifier
-                                .align(Alignment.CenterStart)
-                                .padding(start = 16.dp)
-                        )
+                // calculate buff duration
+                val buffDurationMinutes = if (score >= spawnedNotes * completionThreshold) {
+                    ((score.toFloat() / spawnedNotes.toFloat()) * maxBuffDurationMinutes).toInt()
+                } else {
+                    0
+                }
+
+                // game over screen
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color(0xAA000000)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("Game Over", fontSize = 40.sp, color = Color.White)
+                        Text("Score: $score / $totalNotes", fontSize = 24.sp, color = Color.White)
+
+                        // buff info in endscreen display
+                        if (buffDurationMinutes > 0) {
+                            Text(
+                                "Buff Awarded: +$fullBuffPercentage% speed for $buffDurationMinutes minutes",
+                                fontSize = 20.sp,
+                                color = Color.Green
+                            )
+                        } else {
+                            Text("No buff awarded", fontSize = 20.sp, color = Color.Red)
+                        }
+
+                        Spacer(modifier = Modifier.height(20.dp))
+                        Button(onClick = {
+                            // reset game for next time
+                            score = 0
+                            spawnedNotes = 0
+                            movingNotes = emptyList()
+                            twinkleIndex = 0
+                            gameOver = false
+                        }) {
+                            Text("Play Again")
+                        }
                     }
                 }
-            }
+            } else {
+                // main game screen
+                Column(verticalArrangement = Arrangement.Top, modifier = Modifier.align(Alignment.TopStart)) {
+                    val colors = listOf(
+                        Color(0xffe83b3b),
+                        Color(0xfffb6b1d),
+                        Color(0xfff79617),
+                        Color(0xff91db69),
+                        Color(0xff4d9be6),
+                        Color(0xffa884f3),
+                        Color(0xfff04f78)
+                    )
+                    noteBoxes.forEachIndexed { index, note ->
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(boxHeight)
+                                .background(colors[index])
+                        ) {
+                            Text(note, fontSize = 40.sp, modifier = Modifier.align(Alignment.CenterStart).padding(start = 16.dp))
+                        }
+                    }
+                }
 
-            // Draw moving notes
-            movingNotes.forEach { note ->
-                val noteY = noteBoxes.indexOf(note.note) * boxHeight.value
-                Box(
-                    modifier = Modifier
-                        .offset(x = note.x.dp, y = noteY.dp)
-                        .size(50.dp, boxHeight)
-                        .background(Color.White)
-                ) {
-                    Text(
-                        note.note,
-                        modifier = Modifier.align(Alignment.Center),
-                        fontSize = 24.sp,
-                        color = Color.Black
+                // draw moving notes
+                movingNotes.forEach { note ->
+                    val noteY = noteBoxes.indexOf(note.note) * boxHeight.value // vertical position in dp
+                    Box(
+                        modifier = Modifier
+                            .offset(x = note.x.dp, y = noteY.dp)
+                            .size(50.dp, boxHeight)
+                            .background(Color.White)
+                    ) {
+                        Text(note.note, modifier = Modifier.align(Alignment.Center), fontSize = 24.sp, color = Color.Black)
+                    }
+                }
+
+                // draw pitch line
+                if (hasPitch) {
+                    Box(
+                        modifier = Modifier
+                            .offset(y = animatedOffset)
+                            .fillMaxWidth()
+                            .height(4.dp)
+                            .background(Color.Black)
                     )
                 }
-            }
 
-            // Draw pitch line
-            if (hasPitch) {
-                Box(
-                    modifier = Modifier
-                        .offset(y = animatedOffset)
-                        .fillMaxWidth()
-                        .height(4.dp)
-                        .background(Color.Black)
-                )
-            }
-
-            // Debug / Score display
-            Column(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(16.dp)
-            ) {
-                Text("Score: $score", fontSize = 20.sp)
-                Text("Pitch: %.2f Hz".format(pitch))
-                Text("Note: $noteName")
+                // score display
+                Column(modifier = Modifier.align(Alignment.TopEnd).padding(16.dp)) {
+                    Text("Score: $score / $totalNotes", fontSize = 20.sp)
+                    Text("Pitch: %.2f Hz".format(pitch))
+                    Text("Note: $noteName")
+                }
             }
         }
     }
 }
 
-// Moving note class and generator
+// moving note class and generator
 data class MovingNote(
-    val note: String,
-    var x: Float,
-    val speed: Float = 200f
+    val note: String, //letter of the note
+    var x: Float, //current x of the note
+    val speed: Float = 200f //horizontal speed
 )
 
+//RANDOM MODE (not used when twinkle twinkle mode is on)
 fun generateNote(screenWidth: Float): MovingNote {
     val notes = listOf("C", "D", "E", "F", "G", "A", "B")
-    val note = notes.random()
-    return MovingNote(note = note, x = screenWidth, speed = 200f)
+    val note = notes.random() //pick a random note
+    return MovingNote(note = note, x = screenWidth, speed = 200f) //spawn on the right
+}
+
+//TWINKLE TWINKLE MODE (not used when random mode is on)
+var twinkleIndex = 0
+val twinkleNotes = listOf("C", "C", "G", "G", "A", "A", "G",
+    "F", "F", "E", "E", "D", "D", "C") //twinkle twinkle notes
+
+fun generateTwinkleNote(screenWidth: Float): MovingNote {
+    val note = twinkleNotes[twinkleIndex] //pick note from the current twinkleIndex
+    twinkleIndex = (twinkleIndex + 1) % twinkleNotes.size //advance index and start again if needed
+    return MovingNote(note = note, x = screenWidth, speed = 200f) //spawn note on the right
 }
 
 @Preview(showBackground = true)
