@@ -151,18 +151,35 @@ fun AquaOkeScreen(
     // hit detection
     LaunchedEffect(movingNotes, pitch) {
         if (hasPitch) {
+
+            val screenWidth = context.resources.displayMetrics.widthPixels.toFloat()
+            val noteWidth = 50f
+
+            val pitchLineX = screenWidth * 0.25f   // 25% from left
+            val hitRangeX = 60f                    // how close horizontally counts
+
             val toRemove = movingNotes.filter { note ->
-                //note's lane Y center to put the notes in the center of the track
-                val noteYPx = noteBoxes.indexOf(note.note) * boxHeightPx + boxHeightPx / 2
-                //check if note is close and if it matches the correct note
-                abs(animatedOffsetPx - noteYPx) < hitThreshold && note.note == baseNote
+                val noteYPx =
+                    noteBoxes.indexOf(note.note) * boxHeightPx + boxHeightPx / 2
+
+                val noteXpx = with(density) { note.x.dp.toPx() }
+
+                val isVerticallyAligned =
+                    abs(animatedOffsetPx - noteYPx) < hitThreshold
+
+                val isHorizontallyAligned =
+                    noteXpx in (pitchLineX - hitRangeX)..(pitchLineX + hitRangeX)
+
+                isVerticallyAligned && isHorizontallyAligned && note.note == baseNote
             }
-            if (toRemove.isNotEmpty()) { //add to remove
+
+            if (toRemove.isNotEmpty()) {
                 score += toRemove.size
                 movingNotes = movingNotes - toRemove
             }
         }
     }
+
 
     Scaffold(
         topBar = {
