@@ -44,14 +44,14 @@ app.get("/getGameState", (req, res) => {
                 } 
                 if (rows.length != 0) {
 
-                    req.session.sessionId = rows[0].session_id
-                    req.session.pairingCode = rows[0].pairing_code
-                    req.session.boostDuration = rows[0].boost_duration
+                    req.sessionId = rows[0].session_id
+                    req.pairingCode = rows[0].pairing_code
+                    req.boostDuration = rows[0].boost_duration
                     
                     res.status(200).json({
-                        "session_id":  req.session.sessionId,
-                        "pairing_code":  req.session.pairingCode,
-                        "boost_duration":  req.session.boostDuration
+                        "session_id":  req.sessionId,
+                        "pairing_code":  req.pairingCode,
+                        "boost_duration":  req.boostDuration
                     })
                 }
             }
