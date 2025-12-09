@@ -70,6 +70,7 @@ class MainActivity : ComponentActivity() {
 
             "https://tidesofrubbish.onrender.com/getGameState".httpGet().response() {
                     request, response, result ->
+                Log.i("Test", response.responseMessage)
                 //Get JSON string from server response
                 val jsonString = String(bytes = result.get())
                 Log.i( "Test", jsonString)

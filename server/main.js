@@ -24,15 +24,10 @@ connection.connect((err) => {
 } )
 
 
-app.get('/hello', (req, res) => {
-    res.send('Hello, World!');
-});
-
-
-
 app.get("/getGameState", (req, res) => {
         connection.query("SELECT session_id, pairing_code, boost_duration \
-            FROM tidesofcleania"
+            FROM tidesofcleania\
+            WHERE pairing_code = ?", [req.pairingCode]
             ,
             function (err, rows, fields) {
                 if (err) {
@@ -59,9 +54,24 @@ app.get("/getGameState", (req, res) => {
     
 })
 
-app.put("/postGameState", (req, res) => {
+app.put("/updateGameState", (req, res) => {
 
-        connection.query("UPDATE tidesofcleania SET boost_duration = ? WHERE pairing_code = ?", [req.session.boostDuration], [req.session.pairingCode],
+        connection.query("UPDATE tidesofcleania SET boost_duration = ? WHERE pairing_code = ?", [req.boostDuration], [req.pairingCode],
+            function(err, rows, fields) {
+                if (err) {
+                    console.log("Database Error: " + err)
+                    res.status(500).json({
+                        "message": err
+                    })
+                    return
+                }
+                
+            }
+        )
+})
+
+app.post("/insertGameState", (req, res) => {
+        connection.query("INSERT INTO tidesofcleania (pairing_code, boost_duration) VALUES (?,?)", [req.pairingCode], [req.boostDuration],
             function(err, rows, fields) {
                 if (err) {
                     console.log("Database Error: " + err)
