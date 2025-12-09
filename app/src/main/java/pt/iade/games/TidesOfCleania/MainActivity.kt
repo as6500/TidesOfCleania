@@ -78,9 +78,9 @@ class MainActivity : ComponentActivity() {
                 val gson = GsonBuilder().create()
                 val json = gson.fromJson<JsonObject>(jsonString, JsonObject().javaClass)
 
-//                val hunger = json.get("hunger").asInt
-//                val clean = json.get("clean").asInt
-//                val state = json.get("state").asString
+//                val sessionId = json.get("sessionId").asInt
+//                val pairingCode = json.get("pairingCode").asString
+//                val boostDuration = json.get("boostDuration").asInt
 
                 //Log.i("Server", )
             }

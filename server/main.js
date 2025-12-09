@@ -32,7 +32,7 @@ app.get('/hello', (req, res) => {
 
 app.get("/getGameState", (req, res) => {
         connection.query("SELECT session_id, pairing_code, boost_duration \
-            FROM tidesofcleania TOC "
+            FROM tidesofcleania"
             ,
             function (err, rows, fields) {
                 if (err) {

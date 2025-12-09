@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
+import com.github.kittinunf.fuel.httpPut
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import kotlin.math.*
@@ -207,25 +208,19 @@ fun AquaOkeScreen(
                 }
 
                 //TODO: Update server with new values
-//                val bodyJson = """
-//                  { "boostDuration" : buffDurationMinutes,
-//                    "pairingCode" : "bar",
-//                    "id" : "1"
-//                  }
-//                """
-//
-//                "https://tidesofrubbish.onrender.com/hello".httpPost().body(bodyJson).response() {
-//                        request, response, result ->
-//
-//
-//                    //Get JSON string from server response
-//                    val jsonString = String(bytes = result.get())
-//                    Log.i( "Test", jsonString)
-//
-//                    //Setup JSON and parse JSON
-//                    val gson = GsonBuilder().create()
-//                    val json = gson.fromJson<JsonObject>(jsonString, JsonObject().javaClass)
-//                }
+                val bodyJson = """
+                  { "boostDuration" : buffDurationMinutes,
+                    "pairingCode" : "bar"
+                  }
+                """
+
+                "https://tidesofrubbish.onrender.com/hello".httpPut().body(bodyJson).response() {
+                        request, response, result ->
+
+                    //Get JSON string from server response
+                    val jsonString = String(bytes = result.get())
+                    Log.i( "Server", jsonString)
+                 }
 
                 // game over screen
                 Box(
