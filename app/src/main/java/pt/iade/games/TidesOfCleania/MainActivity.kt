@@ -68,21 +68,22 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-//            "https://tidesofrubbish.onrender.com/hello".httpGet().response() {
-//                    request, response, result ->
-//                //Get JSON string from server response
-//                val jsonString = String(bytes = result.get())
-//                Log.i( "Test", jsonString)
-//
-//                //Setup JSON and parse JSON
-//                val gson = GsonBuilder().create()
-//                val json = gson.fromJson<JsonObject>(jsonString, JsonObject().javaClass)
-//
-////                val hunger = json.get("hunger").asInt
-////                val clean = json.get("clean").asInt
-////                val state = json.get("state").asString
-//
-//            }
+            "https://tidesofrubbish.onrender.com/getGameState".httpGet().response() {
+                    request, response, result ->
+                //Get JSON string from server response
+                val jsonString = String(bytes = result.get())
+                Log.i( "Test", jsonString)
+
+                //Setup JSON and parse JSON
+                val gson = GsonBuilder().create()
+                val json = gson.fromJson<JsonObject>(jsonString, JsonObject().javaClass)
+
+//                val hunger = json.get("hunger").asInt
+//                val clean = json.get("clean").asInt
+//                val state = json.get("state").asString
+
+                //Log.i("Server", )
+            }
 
 
 
