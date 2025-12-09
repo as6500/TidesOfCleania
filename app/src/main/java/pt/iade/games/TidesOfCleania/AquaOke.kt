@@ -23,6 +23,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.github.kittinunf.fuel.httpGet
+import com.github.kittinunf.fuel.httpPost
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonObject
 import kotlin.math.*
 
 class AquaOke : ComponentActivity() {
@@ -75,7 +79,7 @@ fun AquaOkeScreen(
     val coroutineScope = rememberCoroutineScope()
 
     // Notes displayed on screen (ignore the octave)
-    val noteBoxes = listOf("Do", "Re", "Me", "Fa", "So", "La", "Ti")
+    val noteBoxes = listOf("C", "D", "E", "F", "G", "H", "I")
     val boxHeight = 100.dp
 
     // Detect if we have a valid pitch
@@ -84,7 +88,7 @@ fun AquaOkeScreen(
     // Get note name from detected pitch
     val noteName = remember(pitch) {
         if (hasPitch) frequencyToNoteAllOctaves(pitch)
-        else "Invalid"
+        else "No Pitch Detected"
     }
     val baseNote = noteName.takeWhile { it.isLetter() }
 
@@ -201,6 +205,27 @@ fun AquaOkeScreen(
                 } else {
                     0
                 }
+
+                //TODO: Update server with new values
+//                val bodyJson = """
+//                  { "boostDuration" : buffDurationMinutes,
+//                    "pairingCode" : "bar",
+//                    "id" : "1"
+//                  }
+//                """
+//
+//                "https://tidesofrubbish.onrender.com/hello".httpPost().body(bodyJson).response() {
+//                        request, response, result ->
+//
+//
+//                    //Get JSON string from server response
+//                    val jsonString = String(bytes = result.get())
+//                    Log.i( "Test", jsonString)
+//
+//                    //Setup JSON and parse JSON
+//                    val gson = GsonBuilder().create()
+//                    val json = gson.fromJson<JsonObject>(jsonString, JsonObject().javaClass)
+//                }
 
                 // game over screen
                 Box(
