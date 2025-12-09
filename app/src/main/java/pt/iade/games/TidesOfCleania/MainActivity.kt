@@ -32,6 +32,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.github.kittinunf.fuel.httpGet
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonObject
 import kotlin.math.log2
 import kotlin.math.roundToInt
 
@@ -64,6 +67,23 @@ class MainActivity : ComponentActivity() {
                     Log.d("HomeScreen","PERMISSION DENIED")
                 }
             }
+/*
+            "http://10.208.202.131/hello".httpGet().response() {
+                    request, response, result ->
+                //Get JSON string from server response
+                val jsonString = String(bytes = result.get())
+                Log.i( "Test", jsonString)
+
+                //Setup JSON and parse JSON
+                val gson = GsonBuilder().create()
+                val json = gson.fromJson<JsonObject>(jsonString, JsonObject().javaClass)
+
+//                val hunger = json.get("hunger").asInt
+//                val clean = json.get("clean").asInt
+//                val state = json.get("state").asString
+
+            }
+*/
 
 
             MaterialTheme {
@@ -110,7 +130,7 @@ fun HomeScreen(
         contentAlignment = Alignment.Center
     ) {
         Button(onClick = onOpenAquaOke) {
-            Text("Open AquaOke")
+            Text("Start AquaOke")
         }
     }
 }

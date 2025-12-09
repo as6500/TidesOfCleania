@@ -75,7 +75,7 @@ fun AquaOkeScreen(
     val coroutineScope = rememberCoroutineScope()
 
     // Notes displayed on screen (ignore the octave)
-    val noteBoxes = listOf("B", "A", "G", "F", "E", "D", "C")
+    val noteBoxes = listOf("Do", "Re", "Me", "Fa", "So", "La", "Ti")
     val boxHeight = 100.dp
 
     // Detect if we have a valid pitch
@@ -311,15 +311,15 @@ data class MovingNote(
 
 //RANDOM MODE (not used when twinkle twinkle mode is on)
 fun generateNote(screenWidth: Float): MovingNote {
-    val notes = listOf("C", "D", "E", "F", "G", "A", "B")
+    val notes = listOf("Do", "Re", "Me", "Fa", "So", "La", "Ti")
     val note = notes.random() //pick a random note
     return MovingNote(note = note, x = screenWidth, speed = 200f) //spawn on the right
 }
 
 //TWINKLE TWINKLE MODE (not used when random mode is on)
 var twinkleIndex = 0
-val twinkleNotes = listOf("C", "C", "G", "G", "A", "A", "G",
-    "F", "F", "E", "E", "D", "D", "C") //twinkle twinkle notes
+val twinkleNotes = listOf("C", "D", "G", "E", "A", "F", "G",
+    "F", "B", "E", "C", "A", "D", "C") //twinkle twinkle notes
 
 fun generateTwinkleNote(screenWidth: Float): MovingNote {
     val note = twinkleNotes[twinkleIndex] //pick note from the current twinkleIndex

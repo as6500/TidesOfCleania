@@ -55,6 +55,10 @@ dependencies {
         "include" to listOf("*.aar", "*.jar"),
         "exclude" to listOf<String>()
     )))
+    implementation("com.github.kittinunf.fuel:fuel:2.3.1")
+    implementation("com.google.code.gson:gson:2.13.2")
+    runtimeOnly("com.github.kittinunf.fuel:fuel-android:2.3.1")
+    runtimeOnly("com.github.kittinunf.fuel:fuel-gson:2.3.1")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
