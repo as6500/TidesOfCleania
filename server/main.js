@@ -1,7 +1,7 @@
 //Import modules
 const express = require("express")
 const bodyParser = require("body-parser")
-const connection = require("./api/database")
+const connection = require("./database")
 const session = require("express-session")
 
 //Initialize express
@@ -59,7 +59,7 @@ app.get("/getGameState", (req, res) => {
     
 })
 
-router.post("/postGameState", (req, res) => {
+app.put("/postGameState", (req, res) => {
 
         connection.query("UPDATE tidesofcleania SET boost_duration = ? WHERE pairing_code = ?", [req.session.boostDuration], [req.session.pairingCode],
             function(err, rows, fields) {
