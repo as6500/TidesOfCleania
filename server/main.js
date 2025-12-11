@@ -78,9 +78,8 @@ app.put("/updateGameState", (req, res) => {
 })
 
 app.post("/insertGameState", (req, res) => {
-    const params = [req.body.pairingCode, req.body.boostDuration || 0   ];
-    
-    connection.query("INSERT INTO tidesofcleania (pairing_code, boost_duration) VALUES (?,?)", params,
+    connection.query("INSERT INTO tidesofcleania (pairing_code, boost_duration) VALUES (?,?)", 
+        [req.body.pairing_code, req.body.boost_duration],
         function(err, rows, fields) {
             if (err) {
                 console.log("Database Error: " + err)
