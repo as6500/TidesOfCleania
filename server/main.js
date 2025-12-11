@@ -25,9 +25,13 @@ connection.connect((err) => {
 
 
 app.get("/getGameState", (req, res) => {
-        connection.query("SELECT session_id, pairing_code, boost_duration \
+    const pairingCode = req.query.pairingCode;
+    const params = [pairingCode];
+
+        connection.query(
+            "SELECT session_id, pairing_code, boost_duration \
             FROM tidesofcleania\
-            WHERE pairing_code = ?", [req.pairingCode]
+            WHERE pairing_code = ?", params
             ,
             function (err, rows, fields) {
                 if (err) {
@@ -37,17 +41,20 @@ app.get("/getGameState", (req, res) => {
                     })
                     return
                 } 
-                if (rows.length != 0) {
 
-                    req.sessionId = rows[0].session_id
-                    req.pairingCode = rows[0].pairing_code
-                    req.boostDuration = rows[0].boost_duration
-                    
-                    res.status(200).json({
-                        "session_id":  req.sessionId,
-                        "pairing_code":  req.pairingCode,
-                        "boost_duration":  req.boostDuration
-                    })
+                if (rows.length != 0) {
+                const row = rows[0];
+
+                res.status(200).json({
+                    "session_id": row.session_id,
+                    "pairing_code": row.pairing_code,
+                    "boost_duration": row.boost_duration
+                });
+                } 
+                else {
+                    res.status(404).json({
+                        "message": "Code not found"
+                    });
                 }
             }
         )
@@ -71,19 +78,20 @@ app.put("/updateGameState", (req, res) => {
 })
 
 app.post("/insertGameState", (req, res) => {
-        const params = [req.body.pairingCode, req.body.boostDuration || 0   ];
-        connection.query("INSERT INTO tidesofcleania (pairing_code, boost_duration) VALUES (?,?)", params,
-            function(err, rows, fields) {
-                if (err) {
-                    console.log("Database Error: " + err)
-                    res.status(500).json({
-                        "message": err
-                    })
-                    return
-                }
-                
+    const params = [req.body.pairingCode, req.body.boostDuration || 0   ];
+    
+    connection.query("INSERT INTO tidesofcleania (pairing_code, boost_duration) VALUES (?,?)", params,
+        function(err, rows, fields) {
+            if (err) {
+                console.log("Database Error: " + err)
+                res.status(500).json({
+                    "message": err
+                })
+                return
             }
-        )
+                
+        }
+    )
 })
 
 
