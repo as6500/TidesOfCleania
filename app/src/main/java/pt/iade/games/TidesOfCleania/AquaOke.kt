@@ -210,7 +210,7 @@ fun AquaOkeScreen(
                 //TODO: Update server with new values
                 val bodyJson = """
                   { "boostDuration" : buffDurationMinutes,
-                    "pairingCode" : "bar"
+                    "pairingCode" : "654321"
                   }
                 """
 

@@ -68,22 +68,17 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            "https://tidesofrubbish.onrender.com/getGameState".httpGet().response() {
+            val bodyJson = """
+                  { "pairingCode" : "654321"
+                  }
+                """
+            "https://tidesofrubbish.onrender.com/getGameState".httpGet().body(bodyJson).response() {
                     request, response, result ->
-                Log.i("Test", response.responseMessage)
                 //Get JSON string from server response
                 val jsonString = String(bytes = result.get())
-                Log.i( "Test", jsonString)
+                Log.i( "Server", jsonString)
 
-                //Setup JSON and parse JSON
-                val gson = GsonBuilder().create()
-                val json = gson.fromJson<JsonObject>(jsonString, JsonObject().javaClass)
-
-//                val sessionId = json.get("sessionId").asInt
-//                val pairingCode = json.get("pairingCode").asString
-//                val boostDuration = json.get("boostDuration").asInt
-
-                //Log.i("Server", )
+                //Tell the user whether the pairing code is valid
             }
 
 
