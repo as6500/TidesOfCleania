@@ -38,6 +38,11 @@ import com.google.gson.JsonObject
 import kotlin.math.log2
 import kotlin.math.roundToInt
 
+import androidx.compose.material3.TextField
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.runtime.mutableStateOf
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,20 +73,20 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            val bodyJson = """
-                  { "pairingCode" : "654321"
-                  }
-                """
-            "https://tidesofrubbish.onrender.com/getGameState".httpGet().body(bodyJson).response() {
-                    request, response, result ->
-                //Get JSON string from server response
-                val jsonString = String(bytes = result.get())
-                Log.i( "Server", jsonString)
+            //commented this block out just so i can test if my text box works because it was giving me errors
 
-                //Tell the user whether the pairing code is valid
-            }
-
-
+//            val bodyJson = """
+//                  { "pairingCode" : "654321"
+//                  }
+//                """
+//            "https://tidesofrubbish.onrender.com/getGameState".httpGet().body(bodyJson).response() {
+//                    request, response, result ->
+//                //Get JSON string from server response
+//                val jsonString = String(bytes = result.get())
+//                Log.i( "Server", jsonString)
+//
+//                //Tell the user whether the pairing code is valid
+//            }
 
             MaterialTheme {
                 Surface(
@@ -110,22 +115,31 @@ fun HomeScreen(
     pitch: Float,
     onOpenAquaOke: () -> Unit
 ) {
+    var pairingCode by remember { mutableStateOf("") }
+
     Column(
-        modifier = Modifier.padding(top = 200.dp)
-    ) {
-//        Text(
-//            text = "${frequencyToNoteAllOctaves(pitch)} ($pitch Hz)",
-//            fontSize = 40.sp,
-//            textAlign = TextAlign.Center,
-//            modifier = Modifier.fillMaxWidth()
-//        )
-    }
-    Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
-        contentAlignment = Alignment.Center
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        Spacer(modifier = Modifier.height(150.dp))
+
+        TextField(
+            value = pairingCode,
+            onValueChange = { input ->
+                if (input.all { it.isDigit() }) {
+                    pairingCode = input
+                }
+            },
+            label = { Text("Enter Pairing Code") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(0.8f)
+        )
+
+        Spacer(modifier = Modifier.height(40.dp))
+
         Button(onClick = onOpenAquaOke) {
             Text("Start AquaOke")
         }
