@@ -34,6 +34,9 @@ class AquaOke : ComponentActivity() {
     override fun onCreate(savedInstanceState: android.os.Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val pairingCode = intent.getStringExtra(EXTRA_PAIRING_CODE)
+            ?: error("Pairing code missing")
+
         setContent {
             var pitch by remember { mutableFloatStateOf(0f) }
             val context = LocalContext.current
@@ -208,19 +211,32 @@ fun AquaOkeScreen(
                 }
 
                 //TODO: Update server with new values
-                val bodyJson = """
-                  { "boostDuration" : buffDurationMinutes,
-                    "pairingCode" : "654321"
-                  }
-                """
+                LaunchedEffect(Unit) {
+                    val bodyJson = """
+                    {
+                      "boostDuration": $buffDurationMinutes,
+                      "pairingCode": "$pairingCode"
+                    }
+                    """
 
-                "https://tidesofrubbish.onrender.com/hello".httpPut().body(bodyJson).response() {
-                        request, response, result ->
 
-                    //Get JSON string from server response
-                    val jsonString = String(bytes = result.get())
-                    Log.i( "Server", jsonString)
-                 }
+                    "https://tidesofrubbish.onrender.com/hello"
+                        .httpPut()
+                        .header("Content-Type" to "application/json")
+                        .body(bodyJson)
+                        .response { _, _, result ->
+                            result.fold(
+                                success = { bytes ->
+                                    Log.i("Server", String(bytes))
+                                },
+                                failure = { error ->
+                                    Log.e("Server", error.toString())
+                                }
+                            )
+                        }
+                }
+
+
 
                 // game over screen
                 Box(

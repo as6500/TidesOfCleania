@@ -40,14 +40,20 @@ import kotlin.math.roundToInt
 
 import androidx.compose.material3.TextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.runtime.mutableStateOf
 
+const val EXTRA_PAIRING_CODE = "EXTRA_PAIRING_CODE"
 
 class MainActivity : ComponentActivity() {
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
+            var pairingCode by remember { mutableStateOf("")}
             var pitch by remember { mutableFloatStateOf(0f) }
             val context = LocalContext.current
             val launcher = rememberLauncherForActivityResult(
@@ -73,20 +79,20 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            //commented this block out just so i can test if my text box works because it was giving me errors
+            LaunchedEffect(pairingCode) {
+                if (pairingCode.isNotEmpty()) {
+                    "https://tidesofrubbish.onrender.com/getGameState"
+                        .httpGet(listOf("pairingCode" to pairingCode))
+                        .response { _, _, result ->
+                            result.fold(
+                                success = { Log.i("Server", String(it)) },
+                                failure = { Log.e("Server", it.toString()) }
+                            )
+                        }
+                }
+            }
 
-//            val bodyJson = """
-//                  { "pairingCode" : "654321"
-//                  }
-//                """
-//            "https://tidesofrubbish.onrender.com/getGameState".httpGet().body(bodyJson).response() {
-//                    request, response, result ->
-//                //Get JSON string from server response
-//                val jsonString = String(bytes = result.get())
-//                Log.i( "Server", jsonString)
-//
-//                //Tell the user whether the pairing code is valid
-//            }
+
 
             MaterialTheme {
                 Surface(
@@ -94,9 +100,12 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     HomeScreen(
+                        pairingCode = pairingCode,
+                        onPairingCodeChange = { pairingCode = it },
                         pitch,
                         onOpenAquaOke = {
                             val intent = Intent(this, AquaOke::class.java)
+                            intent.putExtra(EXTRA_PAIRING_CODE, pairingCode)
                             startActivity(intent)
                         }
                     )
@@ -112,10 +121,11 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun HomeScreen(
+    pairingCode: String,
+    onPairingCodeChange: (String) -> Unit,
     pitch: Float,
     onOpenAquaOke: () -> Unit
 ) {
-    var pairingCode by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -129,7 +139,7 @@ fun HomeScreen(
             value = pairingCode,
             onValueChange = { input ->
                 if (input.all { it.isDigit() }) {
-                    pairingCode = input
+                    onPairingCodeChange(input)
                 }
             },
             label = { Text("Enter Pairing Code") },
@@ -149,6 +159,10 @@ fun HomeScreen(
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
-    HomeScreen(440f, {})
+    HomeScreen(
+        pairingCode = "654321",
+        onPairingCodeChange = {},
+        pitch = 440f,
+        onOpenAquaOke = {}
+    )
 }
-
