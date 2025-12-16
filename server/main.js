@@ -62,7 +62,7 @@ app.get("/getGameState", (req, res) => {
 })
 
 app.put("/updateGameState", (req, res) => {
-  const { boost_duration, pairing_code } = req.body;
+  const { boostDuration, pairingCode } = req.body;
 
   connection.query(
     "UPDATE tidesofcleania SET boost_duration = ? WHERE pairing_code = ?",
