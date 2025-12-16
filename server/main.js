@@ -1,6 +1,5 @@
 //Import modules
 const express = require("express")
-const bodyParser = require("body-parser")
 const connection = require("./database")
 const session = require("express-session")
 
@@ -62,20 +61,26 @@ app.get("/getGameState", (req, res) => {
 })
 
 app.put("/updateGameState", (req, res) => {
+  const { boost_duration, pairing_code } = req.body;
 
-        connection.query("UPDATE tidesofcleania SET boost_duration = ? WHERE pairing_code = ?", [req.boostDuration], [req.pairingCode],
-            function(err, rows, fields) {
-                if (err) {
-                    console.log("Database Error: " + err)
-                    res.status(500).json({
-                        "message": err
-                    })
-                    return
-                }
-                
-            }
-        )
-})
+  connection.query(
+    "UPDATE tidesofcleania SET boost_duration = ? WHERE pairing_code = ?",
+    [boost_duration, pairing_code],
+    function (err, result) {
+      if (err) {
+        console.error("Database Error:", err);
+        return res.status(500).json({ message: "Database error" });
+      }
+
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: "Code not found" });
+      }
+
+      res.status(200).json({ message: "Game state updated" });
+    }
+  );
+});
+
 
 app.post("/insertGameState", (req, res) => {
     connection.query("INSERT INTO tidesofcleania (pairing_code, boost_duration) VALUES (?,?)", 
@@ -88,6 +93,8 @@ app.post("/insertGameState", (req, res) => {
                 })
                 return
             }
+
+            res.status(201).json({ message: "Game state inserted" });
                 
         }
     )

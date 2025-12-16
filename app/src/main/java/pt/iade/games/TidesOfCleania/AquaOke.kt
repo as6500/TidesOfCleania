@@ -64,7 +64,7 @@ class AquaOke : ComponentActivity() {
             }
 
             MaterialTheme {
-                AquaOkeScreen(pitch, onBack = { finish() })
+                AquaOkeScreen(pitch, pairingCode, onBack = { finish() })
                 SideEffect {
                     launcher.launch(Manifest.permission.RECORD_AUDIO)
                 }
@@ -77,6 +77,7 @@ class AquaOke : ComponentActivity() {
 @Composable
 fun AquaOkeScreen(
     pitch: Float,
+    pairingCode: String,
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
@@ -220,7 +221,7 @@ fun AquaOkeScreen(
                     """
 
 
-                    "https://tidesofrubbish.onrender.com/hello"
+                    "https://tidesofrubbish.onrender.com/updateGameState"
                         .httpPut()
                         .header("Content-Type" to "application/json")
                         .body(bodyJson)
@@ -366,7 +367,7 @@ fun generateTwinkleNote(screenWidth: Float): MovingNote {
 @Preview(showBackground = true)
 @Composable
 fun AquaOkeScreenPreview() {
-    AquaOkeScreen(440f, {})
+    AquaOkeScreen(440f, pairingCode = "654321", {})
 }
 
 fun frequencyToNoteAllOctaves(freq: Float): String {
