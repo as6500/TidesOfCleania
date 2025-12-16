@@ -66,7 +66,7 @@ app.put("/updateGameState", (req, res) => {
 
   connection.query(
     "UPDATE tidesofcleania SET boost_duration = ? WHERE pairing_code = ?",
-    [boost_duration, pairing_code],
+    [boostDuration, pairingCode],
     function (err, result) {
       if (err) {
         console.error("Database Error:", err);
